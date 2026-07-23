@@ -18,6 +18,7 @@ export class MinecraftBot {
           password: botConfig.password,
           version: '1.20.1',
           auth: botConfig.password ? 'microsoft' : 'offline',
+          forge: true,
         });
 
         this.client.on('connect', () => {
