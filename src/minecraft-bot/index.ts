@@ -1,5 +1,5 @@
 import mc from 'minecraft-protocol';
-import { autoVersionForge } from '@tcortega/minecraft-protocol-forge';
+import forgeMod from '@tcortega/minecraft-protocol-forge';
 import { botConfig } from '../config';
 import { ChatMessage } from '../types';
 
@@ -17,11 +17,11 @@ export class MinecraftBot {
           port: botConfig.port,
           username: botConfig.username,
           password: botConfig.password,
-          version: false,
+          version: false as any,
           auth: botConfig.password ? 'microsoft' : 'offline',
         });
 
-        autoVersionForge(this.client);
+        (forgeMod as any).autoVersionForge(this.client);
 
         this.client.on('connect', () => {
           console.log('[Minecraft] Connected to server');
