@@ -149,6 +149,16 @@ export class MinecraftBot {
           console.log('[Minecraft] forgeData fmlNetworkVersion:', res.forgeData.fmlNetworkVersion);
           console.log('[Minecraft] forgeData truncated:', res.forgeData.truncated);
           console.log('[Minecraft] forgeData d:', typeof res.forgeData.d);
+          if (res.forgeData.d && typeof res.forgeData.d === 'string') {
+            console.log('[Minecraft] forgeData.d length:', res.forgeData.d.length);
+            console.log('[Minecraft] forgeData.d first 100 chars:', res.forgeData.d.substring(0, 100));
+            try {
+              const decoded = Buffer.from(res.forgeData.d, 'base64').toString('utf-8');
+              console.log('[Minecraft] forgeData.d decoded:', decoded.substring(0, 500));
+            } catch (e) {
+              console.log('[Minecraft] forgeData.d decode error:', e);
+            }
+          }
           if (res.forgeData.mods) {
             console.log('[Minecraft] forgeData mods type:', typeof res.forgeData.mods);
             console.log('[Minecraft] forgeData mods keys:', Object.keys(res.forgeData.mods));
