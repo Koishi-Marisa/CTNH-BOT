@@ -1,5 +1,5 @@
 import mc from 'minecraft-protocol';
-import { forgeHandshake } from '@tcortega/minecraft-protocol-forge';
+import { autoVersionForge } from '@tcortega/minecraft-protocol-forge';
 import { botConfig } from '../config';
 import { ChatMessage } from '../types';
 
@@ -17,18 +17,11 @@ export class MinecraftBot {
           port: botConfig.port,
           username: botConfig.username,
           password: botConfig.password,
-          version: '1.20.1',
+          version: false,
           auth: botConfig.password ? 'microsoft' : 'offline',
         });
 
-        forgeHandshake(this.client, {
-          forgeMods: [
-            { modid: 'minecraft', version: '1.20.1' },
-            { modid: 'forge', version: '47.1.0' },
-            { modid: 'mcp', version: '20230903.153357' },
-            { modid: 'fml', version: '47.1.0' },
-          ],
-        });
+        autoVersionForge(this.client);
 
         this.client.on('connect', () => {
           console.log('[Minecraft] Connected to server');
