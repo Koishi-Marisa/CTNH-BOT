@@ -23,7 +23,7 @@ export class MinecraftBot {
           auth: botConfig.password ? 'microsoft' : 'offline',
         });
 
-        const forgeHandshake3 = require('@tcortega/minecraft-protocol-forge/src/client/forgeHandshake3');
+        const forgeHandshake3 = require('../patches/@tcortega/minecraft-protocol-forge/src/client/forgeHandshake3');
         forgeHandshake3(this.client, {});
 
         this.client.on('connect', () => {
@@ -114,6 +114,7 @@ export class MinecraftBot {
 
   private async pingServer(): Promise<void> {
     return new Promise((resolve) => {
+      console.log('[Minecraft] Pinging server...');
       mc.ping({
         host: botConfig.host,
         port: botConfig.port,
@@ -125,6 +126,7 @@ export class MinecraftBot {
           return;
         }
         const res = response as any;
+        console.log('[Minecraft] Ping successful');
         console.log('[Minecraft] Ping response keys:', Object.keys(res));
         if (res.description) {
           console.log('[Minecraft] Server name:', res.description);
