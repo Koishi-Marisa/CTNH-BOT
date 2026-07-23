@@ -12,7 +12,7 @@ on:
 jobs:
   run-bot:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 60
 
     env:
       MINECRAFT_SERVER_HOST: x1.started.ink
@@ -42,5 +42,5 @@ jobs:
         echo "Server: $MINECRAFT_SERVER_HOST:$MINECRAFT_SERVER_PORT"
         echo "Username: $MINECRAFT_BOT_USERNAME"
         echo "Auto-connect: $AUTO_CONNECT"
-        timeout 30s npm start || true
+        npm start
         echo "Bot test completed"
