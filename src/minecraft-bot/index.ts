@@ -24,11 +24,13 @@ export class MinecraftBot {
           auth: botConfig.password ? 'microsoft' : 'offline',
         });
 
+        console.log('[Minecraft] serverMods count before handshake:', this.serverMods.length);
         if (this.serverMods.length > 0) {
           console.log('[Minecraft] Using server mods for handshake:', this.serverMods.length, 'mods');
           const forgeHandshake3 = require('@tcortega/minecraft-protocol-forge/src/client/forgeHandshake3');
           forgeHandshake3(this.client, { forgeMods: this.serverMods });
         } else {
+          console.log('[Minecraft] No server mods found, using autoVersionForge');
           (forgeMod as any).autoVersionForge(this.client);
         }
 
@@ -144,10 +146,18 @@ export class MinecraftBot {
         }
         if (res.forgeData) {
           console.log('[Minecraft] forgeData keys:', Object.keys(res.forgeData));
-          if (res.forgeData.mods && res.forgeData.mods.length > 0) {
-            console.log('[Minecraft] forgeData mods count:', res.forgeData.mods.length);
-            this.serverMods = res.forgeData.mods;
-            console.log('[Minecraft] First 10 mods:', JSON.stringify(this.serverMods.slice(0, 10)));
+          console.log('[Minecraft] forgeData fmlNetworkVersion:', res.forgeData.fmlNetworkVersion);
+          console.log('[Minecraft] forgeData truncated:', res.forgeData.truncated);
+          console.log('[Minecraft] forgeData d:', typeof res.forgeData.d);
+          if (res.forgeData.mods) {
+            console.log('[Minecraft] forgeData mods type:', typeof res.forgeData.mods);
+            console.log('[Minecraft] forgeData mods length:', Array.isArray(res.forgeData.mods) ? res.forgeData.mods.length : 'Not array');
+            if (Array.isArray(res.forgeData.mods) && res.forgeData.mods.length > 0) {
+              this.serverMods = res.forgeData.mods;
+              console.log('[Minecraft] First 10 mods:', JSON.stringify(this.serverMods.slice(0, 10)));
+            }
+          } else {
+            console.log('[Minecraft] forgeData.mods is undefined');
           }
         }
         resolve();
