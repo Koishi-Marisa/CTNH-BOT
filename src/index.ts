@@ -123,6 +123,12 @@ async function main(): Promise<void> {
   console.log('WebUI: http://localhost:3000');
   console.log('AI Chat:', aiChat.isAvailable() ? 'Enabled' : 'Disabled (API key not set)');
   console.log('========================================');
+
+  const autoConnect = process.env.AUTO_CONNECT === 'true';
+  if (autoConnect) {
+    console.log('[Main] Auto-connect enabled, connecting to server...');
+    await connectToServer();
+  }
 }
 
 main().catch(console.error);
