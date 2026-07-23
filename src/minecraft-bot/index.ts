@@ -123,21 +123,22 @@ export class MinecraftBot {
           resolve();
           return;
         }
-        console.log('[Minecraft] Ping response keys:', Object.keys(response));
-        if (response.description) {
-          console.log('[Minecraft] Server name:', response.description);
+        const res = response as any;
+        console.log('[Minecraft] Ping response keys:', Object.keys(res));
+        if (res.description) {
+          console.log('[Minecraft] Server name:', res.description);
         }
-        if (response.modinfo) {
-          console.log('[Minecraft] modinfo type:', response.modinfo.type);
-          if (response.modinfo.modList && response.modinfo.modList.length > 0) {
-            console.log('[Minecraft] modList count:', response.modinfo.modList.length);
-            console.log('[Minecraft] modList sample:', JSON.stringify(response.modinfo.modList.slice(0, 10)));
+        if (res.modinfo) {
+          console.log('[Minecraft] modinfo type:', res.modinfo.type);
+          if (res.modinfo.modList && res.modinfo.modList.length > 0) {
+            console.log('[Minecraft] modList count:', res.modinfo.modList.length);
+            console.log('[Minecraft] modList sample:', JSON.stringify(res.modinfo.modList.slice(0, 10)));
           }
         }
-        if (response.forgeData) {
-          console.log('[Minecraft] forgeData keys:', Object.keys(response.forgeData));
-          if (response.forgeData.mods && response.forgeData.mods.length > 0) {
-            console.log('[Minecraft] forgeData mods count:', response.forgeData.mods.length);
+        if (res.forgeData) {
+          console.log('[Minecraft] forgeData keys:', Object.keys(res.forgeData));
+          if (res.forgeData.mods && res.forgeData.mods.length > 0) {
+            console.log('[Minecraft] forgeData mods count:', res.forgeData.mods.length);
           }
         }
         resolve();
