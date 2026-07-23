@@ -151,10 +151,17 @@ export class MinecraftBot {
           console.log('[Minecraft] forgeData d:', typeof res.forgeData.d);
           if (res.forgeData.mods) {
             console.log('[Minecraft] forgeData mods type:', typeof res.forgeData.mods);
-            console.log('[Minecraft] forgeData mods length:', Array.isArray(res.forgeData.mods) ? res.forgeData.mods.length : 'Not array');
+            console.log('[Minecraft] forgeData mods keys:', Object.keys(res.forgeData.mods));
+            console.log('[Minecraft] forgeData mods:', JSON.stringify(res.forgeData.mods));
             if (Array.isArray(res.forgeData.mods) && res.forgeData.mods.length > 0) {
               this.serverMods = res.forgeData.mods;
-              console.log('[Minecraft] First 10 mods:', JSON.stringify(this.serverMods.slice(0, 10)));
+            } else if (typeof res.forgeData.mods === 'object') {
+              const modList = Object.keys(res.forgeData.mods).map(key => ({
+                modid: key,
+                version: res.forgeData.mods[key]
+              }));
+              this.serverMods = modList;
+              console.log('[Minecraft] Converted modList count:', modList.length);
             }
           } else {
             console.log('[Minecraft] forgeData.mods is undefined');
