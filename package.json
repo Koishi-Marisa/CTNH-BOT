@@ -1,0 +1,28 @@
+{
+  "name": "ctnh-bot",
+  "version": "1.0.0",
+  "description": "Minecraft Forge 1.20.1 CTNH Bot with AI chat, WebUI control and AI control",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts",
+    "watch": "nodemon --exec ts-node src/index.ts"
+  },
+  "dependencies": {
+    "minecraft-protocol": "^1.45.0",
+    "openai": "^4.0.0",
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "socket.io": "^4.7.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.8.0",
+    "@types/express": "^4.17.20",
+    "@types/cors": "^2.8.14",
+    "typescript": "^5.2.2",
+    "ts-node": "^10.9.1",
+    "nodemon": "^3.0.1"
+  }
+}

@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CTNH Bot - WebUI Control</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 20px 0;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(90deg, #00ff88, #00ccff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            color: #888;
+            font-size: 1.1rem;
+        }
+
+        .status-bar {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-size: 1rem;
+            font-weight: bold;
+        }
+
+        .status-online {
+            background: rgba(0, 255, 136, 0.2);
+            border: 1px solid #00ff88;
+            color: #00ff88;
+        }
+
+        .status-offline {
+            background: rgba(255, 69, 69, 0.2);
+            border: 1px solid #ff4545;
+            color: #ff4545;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .status-online .status-dot {
+            background: #00ff88;
+        }
+
+        .status-offline .status-dot {
+            background: #ff4545;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .card h2 {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            color: #00ccff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card h2::before {
+            content: '';
+            width: 4px;
+            height: 20px;
+            background: linear-gradient(180deg, #00ccff, #00ff88);
+            border-radius: 2px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00ccff, #00ff88);
+            color: #000;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 204, 255, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff4545, #ff8800);
+            color: #fff;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(255, 69, 69, 0.4);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .input-group input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-group input:focus {
+            border-color: #00ccff;
+        }
+
+        .input-group input::placeholder {
+            color: #888;
+        }
+
+        .chat-container {
+            height: 400px;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .chat-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-container::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
+        }
+
+        .chat-container::-webkit-scrollbar-thumb {
+            background: rgba(0, 204, 255, 0.5);
+            border-radius: 3px;
+        }
+
+        .chat-message {
+            margin-bottom: 15px;
+            padding: 10px 15px;
+            border-radius: 8px;
+            max-width: 80%;
+        }
+
+        .chat-message.user {
+            background: rgba(0, 204, 255, 0.2);
+            margin-left: auto;
+            border-left: 3px solid #00ccff;
+        }
+
+        .chat-message.bot {
+            background: rgba(0, 255, 136, 0.2);
+            margin-right: auto;
+            border-left: 3px solid #00ff88;
+        }
+
+        .chat-message.system {
+            background: rgba(255, 255, 255, 0.05);
+            text-align: center;
+            margin: 0 auto 15px;
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        .chat-message .sender {
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+
+        .chat-message.user .sender {
+            color: #00ccff;
+        }
+
+        .chat-message.bot .sender {
+            color: #00ff88;
+        }
+
+        .chat-message .content {
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .chat-message .time {
+            font-size: 0.75rem;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .ai-control-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .ai-control-panel textarea {
+            width: 100%;
+            height: 100px;
+            padding: 12px 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            font-size: 1rem;
+            outline: none;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .ai-control-panel textarea:focus {
+            border-color: #00ff88;
+        }
+
+        .ai-control-panel textarea::placeholder {
+            color: #888;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-3px);
+        }
+
+        .feature-card .icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .feature-card h3 {
+            font-size: 1rem;
+            margin-bottom: 5px;
+            color: #00ff88;
+        }
+
+        .feature-card p {
+            font-size: 0.85rem;
+            color: #888;
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            header h1 {
+                font-size: 1.8rem;
+            }
+
+            .btn-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>CTNH Bot Control Center</h1>
+            <p>AI-Powered Minecraft Bot for CTNH Server</p>
+        </header>
+
+        <div class="status-bar">
+            <div class="status-indicator status-offline" id="statusIndicator">
+                <div class="status-dot"></div>
+                <span id="statusText">Offline</span>
+            </div>
+        </div>
+
+        <div class="grid">
+            <div class="card">
+                <h2>Server Connection</h2>
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="connectMC()">Connect to Server</button>
+                    <button class="btn btn-danger" onclick="disconnectMC()">Disconnect</button>
+                </div>
+                <div class="input-group">
+                    <input type="text" id="commandInput" placeholder="Enter command (e.g., help)">
+                    <button class="btn btn-primary" onclick="sendCommand()">Send Command</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Features</h2>
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <div class="icon">🤖</div>
+                        <h3>AI Chat</h3>
+                        <p>Intelligent conversation with players</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="icon">🎮</div>
+                        <h3>AI Control</h3>
+                        <p>AI-driven bot actions</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="icon">💬</div>
+                        <h3>Web Chat</h3>
+                        <p>Real-time chat monitoring</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="icon">🔧</div>
+                        <h3>Command Control</h3>
+                        <p>Server command management</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Chat Monitor</h2>
+                <div class="chat-container" id="chatContainer"></div>
+                <div class="input-group">
+                    <input type="text" id="chatInput" placeholder="Send message to server...">
+                    <button class="btn btn-primary" onclick="sendMessage()">Send</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>AI Control</h2>
+                <div class="ai-control-panel">
+                    <textarea id="aiPrompt" placeholder="Enter AI control prompt...&#10;&#10;Example:&#10;让机器人在当前位置放置一个方块&#10;让机器人查看周围环境"></textarea>
+                    <button class="btn btn-primary" onclick="sendAIControl()">Execute AI Command</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        const statusIndicator = document.getElementById('statusIndicator');
+        const statusText = document.getElementById('statusText');
+        const chatContainer = document.getElementById('chatContainer');
+
+        socket.on('status-update', (status) => {
+            if (status.connected) {
+                statusIndicator.className = 'status-indicator status-online';
+                statusText.textContent = 'Connected';
+            } else {
+                statusIndicator.className = 'status-indicator status-offline';
+                statusText.textContent = status.error || 'Offline';
+            }
+        });
+
+        socket.on('chat-message', (message) => {
+            addMessage(message);
+        });
+
+        function addMessage(message) {
+            const msgDiv = document.createElement('div');
+            let senderClass = 'system';
+            let senderName = message.sender;
+
+            if (message.isAI) {
+                senderClass = 'bot';
+            } else if (message.sender !== 'System') {
+                senderClass = 'user';
+            }
+
+            msgDiv.className = `chat-message ${senderClass}`;
+            msgDiv.innerHTML = `
+                <div class="sender">${senderName}</div>
+                <div class="content">${message.content}</div>
+                <div class="time">${new Date(message.timestamp).toLocaleTimeString()}</div>
+            `;
+            chatContainer.appendChild(msgDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function connectMC() {
+            socket.emit('connect-mc');
+        }
+
+        function disconnectMC() {
+            socket.emit('disconnect-mc');
+        }
+
+        function sendCommand() {
+            const input = document.getElementById('commandInput');
+            const command = input.value.trim();
+            if (command) {
+                socket.emit('command', command);
+                addMessage({
+                    sender: 'WebUI',
+                    content: `/${command}`,
+                    timestamp: Date.now(),
+                    isAI: false
+                });
+                input.value = '';
+            }
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            if (message) {
+                socket.emit('message', message);
+                addMessage({
+                    sender: 'WebUI',
+                    content: message,
+                    timestamp: Date.now(),
+                    isAI: false
+                });
+                input.value = '';
+            }
+        }
+
+        function sendAIControl() {
+            const prompt = document.getElementById('aiPrompt');
+            const message = prompt.value.trim();
+            if (message) {
+                socket.emit('message', message);
+                addMessage({
+                    sender: 'AI Control',
+                    content: message,
+                    timestamp: Date.now(),
+                    isAI: false
+                });
+                prompt.value = '';
+            }
+        }
+
+        document.getElementById('commandInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendCommand();
+        });
+
+        document.getElementById('chatInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+
+        addMessage({
+            sender: 'System',
+            content: 'WebUI connected. Ready to control CTNH Bot.',
+            timestamp: Date.now(),
+            isAI: false
+        });
+    </script>
+</body>
+</html>
