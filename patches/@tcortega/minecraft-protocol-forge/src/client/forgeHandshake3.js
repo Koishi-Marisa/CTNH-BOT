@@ -117,8 +117,7 @@ module.exports = function (client, options) {
               const modlistreply = {
                 modNames,
                 channels: [],
-                registries: [],
-                dataPackRegistries: []
+                registries: []
               }
 
               if (!options.modNames) {
@@ -151,10 +150,6 @@ module.exports = function (client, options) {
                     marker: registries[registry]
                   })
                 }
-              }
-
-              if (modlist.dataPackRegistries && !options.dataPackRegistries) {
-                modlistreply.dataPackRegistries = modlist.dataPackRegistries
               }
 
               const modlistreplypacket = proto.createPacketBuffer(

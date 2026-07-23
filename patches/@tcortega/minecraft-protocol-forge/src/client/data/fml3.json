@@ -197,24 +197,6 @@
                           ]
                         }
                       ]
-                    },
-                    {
-                      "name": "dataPackRegistries",
-                      "type": [
-                        "array",
-                        {
-                          "countType": "varint",
-                          "type": [
-                            "container",
-                            [
-                              {
-                                "name": "name",
-                                "type": "string"
-                              }
-                            ]
-                          ]
-                        }
-                      ]
                     }
                   ]
                 ],
@@ -268,24 +250,6 @@
                               },
                               {
                                 "name": "marker",
-                                "type": "string"
-                              }
-                            ]
-                          ]
-                        }
-                      ]
-                    },
-                    {
-                      "name": "dataPackRegistries",
-                      "type": [
-                        "array",
-                        {
-                          "countType": "varint",
-                          "type": [
-                            "container",
-                            [
-                              {
-                                "name": "name",
                                 "type": "string"
                               }
                             ]
