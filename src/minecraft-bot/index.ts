@@ -1,9 +1,10 @@
-import mineflayer from 'mineflayer';
+import mc from 'minecraft-protocol';
+import { forgeHandshake } from '@tcortega/minecraft-protocol-forge';
 import { botConfig } from '../config';
 import { ChatMessage } from '../types';
 
 export class MinecraftBot {
-  private bot: mineflayer.Bot | null = null;
+  private client: mc.Client | null = null;
   private onMessageCallback: ((message: ChatMessage) => void) | null = null;
   private onConnectCallback: (() => void) | null = null;
   private onDisconnectCallback: ((reason: string) => void) | null = null;
@@ -11,46 +12,54 @@ export class MinecraftBot {
   connect(): Promise<void> {
     return new Promise((resolve, reject) => {
       try {
-        this.bot = mineflayer.createBot({
+        this.client = mc.createClient({
           host: botConfig.host,
           port: botConfig.port,
           username: botConfig.username,
           password: botConfig.password,
           version: '1.20.1',
           auth: botConfig.password ? 'microsoft' : 'offline',
-          forge: true,
-        } as any);
+        });
 
-        this.bot.on('login', () => {
-          console.log('[Minecraft] Logged in to server');
+        forgeHandshake(this.client, {
+          forgeMods: [
+            { modid: 'minecraft', version: '1.20.1' },
+            { modid: 'forge', version: '47.1.0' },
+            { modid: 'mcp', version: '20230903.153357' },
+            { modid: 'fml', version: '47.1.0' },
+          ],
+        });
+
+        this.client.on('connect', () => {
+          console.log('[Minecraft] Connected to server');
+        });
+
+        this.client.on('login', () => {
+          console.log('[Minecraft] Logged in successfully');
           if (this.onConnectCallback) this.onConnectCallback();
           resolve();
         });
 
-        this.bot.on('chat', (username, message) => {
-          if (username === this.bot?.username) return;
-          const chatMessage: ChatMessage = {
+        this.client.on('chat', (packet) => {
+          const message: ChatMessage = {
             id: Date.now().toString(),
-            sender: username,
-            content: message,
+            sender: this.extractSender(packet.message),
+            content: this.extractContent(packet.message),
             timestamp: Date.now(),
             isAI: false,
           };
-          if (this.onMessageCallback) this.onMessageCallback(chatMessage);
+          if (this.onMessageCallback) this.onMessageCallback(message);
         });
 
-        this.bot.on('end', (reason) => {
-          console.log(`[Minecraft] Disconnected: ${reason || 'Unknown reason'}`);
-          if (this.onDisconnectCallback) this.onDisconnectCallback(reason || 'Unknown');
+        this.client.on('disconnect', (packet) => {
+          const reason = packet.reason || 'Unknown reason';
+          console.log(`[Minecraft] Disconnected: ${reason}`);
+          if (this.onDisconnectCallback) this.onDisconnectCallback(reason);
         });
 
-        this.bot.on('error', (err) => {
-          console.error('[Minecraft] Error:', err);
+        this.client.on('error', (err) => {
+          console.error('[Minecraft] Connection error:', err);
           reject(err);
-        });
-
-        this.bot.on('spawn', () => {
-          console.log('[Minecraft] Bot spawned');
         });
       } catch (err) {
         reject(err);
@@ -59,21 +68,21 @@ export class MinecraftBot {
   }
 
   disconnect(): void {
-    if (this.bot) {
-      this.bot.end();
-      this.bot = null;
+    if (this.client) {
+      this.client.end();
+      this.client = null;
     }
   }
 
   sendMessage(message: string): void {
-    if (this.bot) {
-      this.bot.chat(message);
+    if (this.client) {
+      this.client.write('chat', { message });
     }
   }
 
   sendCommand(command: string): void {
-    if (this.bot) {
-      this.bot.chat(`/${command}`);
+    if (this.client) {
+      this.client.write('chat', { message: `/${command}` });
     }
   }
 
@@ -89,12 +98,22 @@ export class MinecraftBot {
     this.onDisconnectCallback = callback;
   }
 
-  getBot(): mineflayer.Bot | null {
-    return this.bot;
+  getClient(): mc.Client | null {
+    return this.client;
   }
 
   isConnected(): boolean {
-    return this.bot !== null;
+    return this.client !== null && this.client.state === 'play';
+  }
+
+  private extractSender(message: string): string {
+    const match = message.match(/^<([^>]+)>/);
+    return match ? match[1] : 'System';
+  }
+
+  private extractContent(message: string): string {
+    const match = message.match(/^<[^>]+>\s*(.+)$/);
+    return match ? match[1] : message;
   }
 }
 
