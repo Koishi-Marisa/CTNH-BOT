@@ -42,5 +42,5 @@ jobs:
         echo "Server: $MINECRAFT_SERVER_HOST:$MINECRAFT_SERVER_PORT"
         echo "Username: $MINECRAFT_BOT_USERNAME"
         echo "Auto-connect: $AUTO_CONNECT"
-        timeout 15s npm start || true
+        timeout 30s npm start || true
         echo "Bot test completed"
