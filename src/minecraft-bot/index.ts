@@ -149,12 +149,17 @@ export class MinecraftBot {
           console.log('[Minecraft] forgeData fmlNetworkVersion:', res.forgeData.fmlNetworkVersion);
           console.log('[Minecraft] forgeData truncated:', res.forgeData.truncated);
           console.log('[Minecraft] forgeData d:', typeof res.forgeData.d);
+          if (res.forgeData.channels) {
+            console.log('[Minecraft] forgeData.channels:', JSON.stringify(res.forgeData.channels).substring(0, 500));
+          }
           if (res.forgeData.d && typeof res.forgeData.d === 'string') {
             console.log('[Minecraft] forgeData.d length:', res.forgeData.d.length);
             console.log('[Minecraft] forgeData.d first 100 chars:', res.forgeData.d.substring(0, 100));
             try {
               const zlib = require('zlib');
-              const rawBuffer = Buffer.from(res.forgeData.d, 'binary');
+              const rawBuffer = Buffer.from(res.forgeData.d, 'latin1');
+              console.log('[Minecraft] rawBuffer length:', rawBuffer.length);
+              console.log('[Minecraft] rawBuffer first 20 bytes:', rawBuffer.slice(0, 20).toString('hex'));
               zlib.inflateRaw(rawBuffer, (err: any, result: Buffer) => {
                 if (err) {
                   console.log('[Minecraft] zlib inflateRaw error:', err.message);
