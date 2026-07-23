@@ -18,8 +18,8 @@ export class MinecraftBot {
           password: botConfig.password,
           version: '1.20.1',
           auth: botConfig.password ? 'microsoft' : 'offline',
-          forge: true,
-        });
+          ...(botConfig.password ? {} : { forge: true }),
+        } as any);
 
         this.client.on('connect', () => {
           console.log('[Minecraft] Connected to server');
