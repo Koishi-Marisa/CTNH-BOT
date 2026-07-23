@@ -1,9 +1,9 @@
-import mc from 'minecraft-protocol';
+import mineflayer from 'mineflayer';
 import { botConfig } from '../config';
 import { ChatMessage } from '../types';
 
 export class MinecraftBot {
-  private client: mc.Client | null = null;
+  private bot: mineflayer.Bot | null = null;
   private onMessageCallback: ((message: ChatMessage) => void) | null = null;
   private onConnectCallback: (() => void) | null = null;
   private onDisconnectCallback: ((reason: string) => void) | null = null;
@@ -11,45 +11,44 @@ export class MinecraftBot {
   connect(): Promise<void> {
     return new Promise((resolve, reject) => {
       try {
-        this.client = mc.createClient({
+        this.bot = mineflayer.createBot({
           host: botConfig.host,
           port: botConfig.port,
           username: botConfig.username,
           password: botConfig.password,
           version: '1.20.1',
           auth: botConfig.password ? 'microsoft' : 'offline',
-          ...(botConfig.password ? {} : { forge: true }),
-        } as any);
+        });
 
-        this.client.on('connect', () => {
-          console.log('[Minecraft] Connected to server');
+        this.bot.on('login', () => {
+          console.log('[Minecraft] Logged in to server');
           if (this.onConnectCallback) this.onConnectCallback();
           resolve();
         });
 
-        this.client.on('chat', (packet) => {
-          const message: ChatMessage = {
+        this.bot.on('chat', (username, message) => {
+          if (username === this.bot?.username) return;
+          const chatMessage: ChatMessage = {
             id: Date.now().toString(),
-            sender: this.extractSender(packet.message),
-            content: this.extractContent(packet.message),
+            sender: username,
+            content: message,
             timestamp: Date.now(),
             isAI: false,
           };
-          if (this.onMessageCallback) this.onMessageCallback(message);
+          if (this.onMessageCallback) this.onMessageCallback(chatMessage);
         });
 
-        this.client.on('disconnect', (packet) => {
-          const reason = packet.reason || 'Unknown reason';
-          console.log(`[Minecraft] Disconnected: ${reason}`);
-          if (this.onDisconnectCallback) this.onDisconnectCallback(reason);
+        this.bot.on('end', (reason) => {
+          console.log(`[Minecraft] Disconnected: ${reason || 'Unknown reason'}`);
+          if (this.onDisconnectCallback) this.onDisconnectCallback(reason || 'Unknown');
         });
 
-        this.client.on('error', (err) => {
-          console.error('[Minecraft] Connection error:', err);
+        this.bot.on('error', (err) => {
+          console.error('[Minecraft] Error:', err);
           reject(err);
         });
 
-        this.client.on('spawn', () => {
+        this.bot.on('spawn', () => {
           console.log('[Minecraft] Bot spawned');
         });
       } catch (err) {
@@ -59,21 +58,21 @@ export class MinecraftBot {
   }
 
   disconnect(): void {
-    if (this.client) {
-      this.client.end();
-      this.client = null;
+    if (this.bot) {
+      this.bot.end();
+      this.bot = null;
     }
   }
 
   sendMessage(message: string): void {
-    if (this.client) {
-      this.client.write('chat', { message });
+    if (this.bot) {
+      this.bot.chat(message);
     }
   }
 
   sendCommand(command: string): void {
-    if (this.client) {
-      this.client.write('chat', { message: `/${command}` });
+    if (this.bot) {
+      this.bot.chat(`/${command}`);
     }
   }
 
@@ -89,22 +88,12 @@ export class MinecraftBot {
     this.onDisconnectCallback = callback;
   }
 
-  getClient(): mc.Client | null {
-    return this.client;
+  getBot(): mineflayer.Bot | null {
+    return this.bot;
   }
 
   isConnected(): boolean {
-    return this.client !== null && this.client.state === 'play';
-  }
-
-  private extractSender(message: string): string {
-    const match = message.match(/^<([^>]+)>/);
-    return match ? match[1] : 'System';
-  }
-
-  private extractContent(message: string): string {
-    const match = message.match(/^<[^>]+>\s*(.+)$/);
-    return match ? match[1] : message;
+    return this.bot !== null;
   }
 }
 
