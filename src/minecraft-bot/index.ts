@@ -9,9 +9,11 @@ export class MinecraftBot {
   private onConnectCallback: (() => void) | null = null;
   private onDisconnectCallback: ((reason: string) => void) | null = null;
 
-  connect(): Promise<void> {
-    return new Promise((resolve, reject) => {
+  async connect(): Promise<void> {
+    return new Promise(async (resolve, reject) => {
       try {
+        await this.pingServer();
+
         this.client = mc.createClient({
           host: botConfig.host,
           port: botConfig.port,
@@ -22,16 +24,6 @@ export class MinecraftBot {
         });
 
         (forgeMod as any).autoVersionForge(this.client);
-
-        this.client.on('ping', (response: any) => {
-          console.log('[Minecraft] Server ping response keys:', Object.keys(response));
-          if (response.modinfo) {
-            console.log('[Minecraft] modinfo:', JSON.stringify(response.modinfo));
-          }
-          if (response.forgeData) {
-            console.log('[Minecraft] forgeData:', JSON.stringify(response.forgeData));
-          }
-        });
 
         this.client.on('connect', () => {
           console.log('[Minecraft] Connected to server');
@@ -117,6 +109,40 @@ export class MinecraftBot {
   private extractContent(message: string): string {
     const match = message.match(/^<[^>]+>\s*(.+)$/);
     return match ? match[1] : message;
+  }
+
+  private async pingServer(): Promise<void> {
+    return new Promise((resolve) => {
+      mc.ping({
+        host: botConfig.host,
+        port: botConfig.port,
+        version: '1.20.1',
+      }, (err, response) => {
+        if (err) {
+          console.log('[Minecraft] Ping failed:', err);
+          resolve();
+          return;
+        }
+        console.log('[Minecraft] Ping response keys:', Object.keys(response));
+        if (response.description) {
+          console.log('[Minecraft] Server name:', response.description);
+        }
+        if (response.modinfo) {
+          console.log('[Minecraft] modinfo type:', response.modinfo.type);
+          if (response.modinfo.modList && response.modinfo.modList.length > 0) {
+            console.log('[Minecraft] modList count:', response.modinfo.modList.length);
+            console.log('[Minecraft] modList sample:', JSON.stringify(response.modinfo.modList.slice(0, 10)));
+          }
+        }
+        if (response.forgeData) {
+          console.log('[Minecraft] forgeData keys:', Object.keys(response.forgeData));
+          if (response.forgeData.mods && response.forgeData.mods.length > 0) {
+            console.log('[Minecraft] forgeData mods count:', response.forgeData.mods.length);
+          }
+        }
+        resolve();
+      });
+    });
   }
 }
 
