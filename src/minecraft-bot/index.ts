@@ -8,6 +8,7 @@ export class MinecraftBot {
   private onMessageCallback: ((message: ChatMessage) => void) | null = null;
   private onConnectCallback: (() => void) | null = null;
   private onDisconnectCallback: ((reason: string) => void) | null = null;
+  private serverMods: any[] = [];
 
   async connect(): Promise<void> {
     return new Promise(async (resolve, reject) => {
@@ -23,7 +24,13 @@ export class MinecraftBot {
           auth: botConfig.password ? 'microsoft' : 'offline',
         });
 
-        (forgeMod as any).autoVersionForge(this.client);
+        if (this.serverMods.length > 0) {
+          console.log('[Minecraft] Using server mods for handshake:', this.serverMods.length, 'mods');
+          const forgeHandshake3 = require('@tcortega/minecraft-protocol-forge/src/client/forgeHandshake3');
+          forgeHandshake3(this.client, { forgeMods: this.serverMods });
+        } else {
+          (forgeMod as any).autoVersionForge(this.client);
+        }
 
         this.client.on('connect', () => {
           console.log('[Minecraft] Connected to server');
@@ -139,6 +146,8 @@ export class MinecraftBot {
           console.log('[Minecraft] forgeData keys:', Object.keys(res.forgeData));
           if (res.forgeData.mods && res.forgeData.mods.length > 0) {
             console.log('[Minecraft] forgeData mods count:', res.forgeData.mods.length);
+            this.serverMods = res.forgeData.mods;
+            console.log('[Minecraft] First 10 mods:', JSON.stringify(this.serverMods.slice(0, 10)));
           }
         }
         resolve();
