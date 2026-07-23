@@ -17,11 +17,18 @@ export class MinecraftBot {
           port: botConfig.port,
           username: botConfig.username,
           password: botConfig.password,
-          version: false as any,
+          version: '1.20.1',
           auth: botConfig.password ? 'microsoft' : 'offline',
         });
 
-        (forgeMod as any).autoVersionForge(this.client);
+        (forgeMod as any).forgeHandshake(this.client, {
+          forgeMods: [
+            { modid: 'minecraft', version: '1.20.1' },
+            { modid: 'forge', version: '47.1.0' },
+            { modid: 'mcp', version: '20230903.153357' },
+            { modid: 'fml', version: '47.1.0' },
+          ],
+        });
 
         this.client.on('connect', () => {
           console.log('[Minecraft] Connected to server');
