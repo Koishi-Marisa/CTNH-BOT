@@ -22,11 +22,14 @@ export class MinecraftBot {
         });
 
         (forgeMod as any).autoVersionForge(this.client);
-        
-        this.client.on('forgeMods', (mods: any[]) => {
-          console.log('[Minecraft] Detected server mods:', mods.length, 'mods');
-          if (mods.length > 0) {
-            console.log('[Minecraft] First 5 mods:', JSON.stringify(mods.slice(0, 5)));
+
+        this.client.on('ping', (response: any) => {
+          console.log('[Minecraft] Server ping response keys:', Object.keys(response));
+          if (response.modinfo) {
+            console.log('[Minecraft] modinfo:', JSON.stringify(response.modinfo));
+          }
+          if (response.forgeData) {
+            console.log('[Minecraft] forgeData:', JSON.stringify(response.forgeData));
           }
         });
 
