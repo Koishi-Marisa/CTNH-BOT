@@ -8,7 +8,6 @@ export class MinecraftBot {
   private onMessageCallback: ((message: ChatMessage) => void) | null = null;
   private onConnectCallback: (() => void) | null = null;
   private onDisconnectCallback: ((reason: string) => void) | null = null;
-  private serverMods: any[] = [];
 
   async connect(): Promise<void> {
     return new Promise(async (resolve, reject) => {
@@ -130,68 +129,8 @@ export class MinecraftBot {
         if (res.description) {
           console.log('[Minecraft] Server name:', res.description);
         }
-        if (res.modinfo) {
-          console.log('[Minecraft] modinfo type:', res.modinfo.type);
-          if (res.modinfo.modList && res.modinfo.modList.length > 0) {
-            console.log('[Minecraft] modList count:', res.modinfo.modList.length);
-            console.log('[Minecraft] modList sample:', JSON.stringify(res.modinfo.modList.slice(0, 10)));
-          }
-        }
         if (res.forgeData) {
-          console.log('[Minecraft] forgeData keys:', Object.keys(res.forgeData));
-          console.log('[Minecraft] forgeData fmlNetworkVersion:', res.forgeData.fmlNetworkVersion);
-          console.log('[Minecraft] forgeData truncated:', res.forgeData.truncated);
-          console.log('[Minecraft] forgeData d:', typeof res.forgeData.d);
-          if (res.forgeData.channels) {
-            console.log('[Minecraft] forgeData.channels:', JSON.stringify(res.forgeData.channels).substring(0, 500));
-          }
-          if (res.forgeData.d && typeof res.forgeData.d === 'string') {
-            console.log('[Minecraft] forgeData.d length:', res.forgeData.d.length);
-            console.log('[Minecraft] forgeData.d first 100 chars:', res.forgeData.d.substring(0, 100));
-            try {
-              const zlib = require('zlib');
-              const rawBuffer = Buffer.from(res.forgeData.d, 'latin1');
-              console.log('[Minecraft] rawBuffer length:', rawBuffer.length);
-              console.log('[Minecraft] rawBuffer first 20 bytes:', rawBuffer.slice(0, 20).toString('hex'));
-              zlib.inflateRaw(rawBuffer, (err: any, result: Buffer) => {
-                if (err) {
-                  console.log('[Minecraft] zlib inflateRaw error:', err.message);
-                  try {
-                    zlib.gunzip(rawBuffer, (err2: any, result2: Buffer) => {
-                      if (err2) {
-                        console.log('[Minecraft] zlib gunzip error:', err2.message);
-                      } else {
-                        console.log('[Minecraft] forgeData.d gunzip decoded:', result2.toString('utf-8').substring(0, 500));
-                      }
-                    });
-                  } catch (e2) {
-                    console.log('[Minecraft] zlib error:', e2);
-                  }
-                } else {
-                  console.log('[Minecraft] forgeData.d inflateRaw decoded:', result.toString('utf-8').substring(0, 500));
-                }
-              });
-            } catch (e) {
-              console.log('[Minecraft] forgeData.d decode error:', e);
-            }
-          }
-          if (res.forgeData.mods) {
-            console.log('[Minecraft] forgeData mods type:', typeof res.forgeData.mods);
-            console.log('[Minecraft] forgeData mods keys:', Object.keys(res.forgeData.mods));
-            console.log('[Minecraft] forgeData mods:', JSON.stringify(res.forgeData.mods));
-            if (Array.isArray(res.forgeData.mods) && res.forgeData.mods.length > 0) {
-              this.serverMods = res.forgeData.mods;
-            } else if (typeof res.forgeData.mods === 'object') {
-              const modList = Object.keys(res.forgeData.mods).map(key => ({
-                modid: key,
-                version: res.forgeData.mods[key]
-              }));
-              this.serverMods = modList;
-              console.log('[Minecraft] Converted modList count:', modList.length);
-            }
-          } else {
-            console.log('[Minecraft] forgeData.mods is undefined');
-          }
+          console.log('[Minecraft] FML Network Version:', res.forgeData.fmlNetworkVersion);
         }
         resolve();
       });
