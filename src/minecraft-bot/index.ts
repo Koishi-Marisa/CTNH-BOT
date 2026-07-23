@@ -24,15 +24,8 @@ export class MinecraftBot {
           auth: botConfig.password ? 'microsoft' : 'offline',
         });
 
-        console.log('[Minecraft] serverMods count before handshake:', this.serverMods.length);
-        if (this.serverMods.length > 0) {
-          console.log('[Minecraft] Using server mods for handshake:', this.serverMods.length, 'mods');
-          const forgeHandshake3 = require('@tcortega/minecraft-protocol-forge/src/client/forgeHandshake3');
-          forgeHandshake3(this.client, { forgeMods: this.serverMods });
-        } else {
-          console.log('[Minecraft] No server mods found, using autoVersionForge');
-          (forgeMod as any).autoVersionForge(this.client);
-        }
+        const forgeHandshake3 = require('@tcortega/minecraft-protocol-forge/src/client/forgeHandshake3');
+        forgeHandshake3(this.client, {});
 
         this.client.on('connect', () => {
           console.log('[Minecraft] Connected to server');
