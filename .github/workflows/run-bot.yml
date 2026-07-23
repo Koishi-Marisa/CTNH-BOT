@@ -1,0 +1,44 @@
+name: Run CTNH Bot
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/run-bot.yml'
+      - 'src/**'
+      - 'package.json'
+
+jobs:
+  run-bot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    env:
+      MINECRAFT_SERVER_HOST: x1.started.ink
+      MINECRAFT_SERVER_PORT: 10014
+      MINECRAFT_BOT_USERNAME: test
+      WEBUI_PORT: 3000
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Use Node.js 20.x
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20.x
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Build
+      run: npm run build
+
+    - name: Run CTNH Bot (test connection)
+      run: |
+        echo "Starting CTNH Bot..."
+        echo "Server: $MINECRAFT_SERVER_HOST:$MINECRAFT_SERVER_PORT"
+        echo "Username: $MINECRAFT_BOT_USERNAME"
+        timeout 30s npm start || true
+        echo "Bot test completed"
