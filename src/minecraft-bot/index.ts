@@ -153,8 +153,26 @@ export class MinecraftBot {
             console.log('[Minecraft] forgeData.d length:', res.forgeData.d.length);
             console.log('[Minecraft] forgeData.d first 100 chars:', res.forgeData.d.substring(0, 100));
             try {
-              const decoded = Buffer.from(res.forgeData.d, 'base64').toString('utf-8');
-              console.log('[Minecraft] forgeData.d decoded:', decoded.substring(0, 500));
+              const zlib = require('zlib');
+              const rawBuffer = Buffer.from(res.forgeData.d, 'binary');
+              zlib.inflateRaw(rawBuffer, (err: any, result: Buffer) => {
+                if (err) {
+                  console.log('[Minecraft] zlib inflateRaw error:', err.message);
+                  try {
+                    zlib.gunzip(rawBuffer, (err2: any, result2: Buffer) => {
+                      if (err2) {
+                        console.log('[Minecraft] zlib gunzip error:', err2.message);
+                      } else {
+                        console.log('[Minecraft] forgeData.d gunzip decoded:', result2.toString('utf-8').substring(0, 500));
+                      }
+                    });
+                  } catch (e2) {
+                    console.log('[Minecraft] zlib error:', e2);
+                  }
+                } else {
+                  console.log('[Minecraft] forgeData.d inflateRaw decoded:', result.toString('utf-8').substring(0, 500));
+                }
+              });
             } catch (e) {
               console.log('[Minecraft] forgeData.d decode error:', e);
             }
