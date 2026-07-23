@@ -8,6 +8,7 @@ on:
       - '.github/workflows/run-bot.yml'
       - 'src/**'
       - 'package.json'
+      - 'patches/**'
 
 jobs:
   run-bot:
