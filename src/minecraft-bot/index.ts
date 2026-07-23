@@ -17,17 +17,17 @@ export class MinecraftBot {
           port: botConfig.port,
           username: botConfig.username,
           password: botConfig.password,
-          version: '1.20.1',
+          version: false as any,
           auth: botConfig.password ? 'microsoft' : 'offline',
         });
 
-        (forgeMod as any).forgeHandshake(this.client, {
-          forgeMods: [
-            { modid: 'minecraft', version: '1.20.1' },
-            { modid: 'forge', version: '47.1.0' },
-            { modid: 'mcp', version: '20230903.153357' },
-            { modid: 'fml', version: '47.1.0' },
-          ],
+        (forgeMod as any).autoVersionForge(this.client);
+        
+        this.client.on('forgeMods', (mods: any[]) => {
+          console.log('[Minecraft] Detected server mods:', mods.length, 'mods');
+          if (mods.length > 0) {
+            console.log('[Minecraft] First 5 mods:', JSON.stringify(mods.slice(0, 5)));
+          }
         });
 
         this.client.on('connect', () => {
